@@ -14,14 +14,21 @@ type Args struct {
 	HeadCPUs    string
 	HeadMemory  string
         ConfigName  string
+        Ttl         int32
 }
 
 func ParseArgs() Args {
 	args := os.Args[1:]
 	jobName := utils.GenerateRandomName()
 	hasName := false
+        ttl := int32(3600)
 
 	for i, arg := range args {
+                if arg == "-help" || arg == "-h" {
+                        hasName = true // hack
+                        ttl = 10
+                        break
+                }
 		if arg == "-name" && i+1 < len(args) {
 			jobName = args[i+1]
 			hasName = true
@@ -80,6 +87,7 @@ func ParseArgs() Args {
 		HeadCPUs:   headCPUs,
 		HeadMemory: headMemory,
                 ConfigName: configName,
+                Ttl:        ttl,
 	}
 }
 

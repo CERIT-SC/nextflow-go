@@ -17,7 +17,7 @@ func BoolPtr(b bool) *bool    { return &b }
 func Int64Ptr(i int64) *int64 { return &i }
 
 func GenerateRandomName() string {
-	return strings.ReplaceAll(fmt.Sprintf("%s-%s", gofakeit.Adjective(), gofakeit.Noun()), " ", "-")
+	return strings.ToLower(strings.ReplaceAll(fmt.Sprintf("%s-%s", gofakeit.Adjective(), gofakeit.Noun()), " ", "-"))
 }
 
 func PrintAsJSON(obj interface{}) {
@@ -75,9 +75,11 @@ func NormalizeVolumes(args []string, k8sConfig map[string]string) []string {
 		}
 	}
 
-	volumes = append(volumes, fmt.Sprintf("%s:%s",
-		stripped(k8sConfig["storageClaimName"]),
-		stripped(k8sConfig["storageMountPath"])))
+        if stripped(k8sConfig["storageClaimName"]) != "" && stripped(k8sConfig["storageMountPath"]) != "" {
+ 	        volumes = append(volumes, fmt.Sprintf("%s:%s",
+		        stripped(k8sConfig["storageClaimName"]),
+		        stripped(k8sConfig["storageMountPath"])))
+        }
 
 	pattern := `(?i)\[\s*volumeClaim\s*:\s*['\"]([^'\"]+)['\"]\s*,\s*mountPath\s*:\s*['\"]([^'\"]+)['\"]\s*\]`
 	re := regexp.MustCompile(pattern)

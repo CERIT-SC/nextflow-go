@@ -62,7 +62,6 @@ func Execute(dryRun bool) {
 	}
 
         secretName := "nf-config-"
-        var createdSecret *corev1.Secret
         ctx := context.Background()
 
         if ! dryRun {
@@ -90,6 +89,7 @@ func Execute(dryRun bool) {
 			},
 		},
 		Spec: batchv1.JobSpec{
+                        TTLSecondsAfterFinished: &args.Ttl,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"job-name": args.JobName}},
 				Spec: corev1.PodSpec{
@@ -118,6 +118,12 @@ func Execute(dryRun bool) {
 	        if err != nil {
 		        panic(err)
 	        }
+        
+                existingSecret, err := clientset.CoreV1().Secrets(namespace).Get(ctx, secretName, metav1.GetOptions{})
+                if err != nil {
+                        panic(err)
+                }
+                
                 ownerRef := metav1.OwnerReference{
                         APIVersion:         "batch/v1",
                         Kind:               "Job",
@@ -126,13 +132,13 @@ func Execute(dryRun bool) {
                         Controller:         utils.BoolPtr(true),
                         BlockOwnerDeletion: utils.BoolPtr(true),
                 }
-                secretPatch := &corev1.Secret{
-                        ObjectMeta: metav1.ObjectMeta{
-                                Name:            createdSecret.Name,
-                                OwnerReferences: []metav1.OwnerReference{ownerRef},
-                        },
+ 
+                existingSecret.ObjectMeta.OwnerReferences = []metav1.OwnerReference{ownerRef}
+
+                _, err = clientset.CoreV1().Secrets(namespace).Update(ctx, existingSecret, metav1.UpdateOptions{})
+                if err != nil {
+                        panic(err)
                 }
-                _, _ = clientset.CoreV1().Secrets(namespace).Update(ctx, secretPatch, metav1.UpdateOptions{})
 
                 var podName string
                 for {
