@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+        "time"
 
         "nextflow-go/pkg/args"
         "nextflow-go/pkg/config"
@@ -132,6 +133,48 @@ func Execute(dryRun bool) {
                         },
                 }
                 _, _ = clientset.CoreV1().Secrets(namespace).Update(ctx, secretPatch, metav1.UpdateOptions{})
+
+                var podName string
+                for {
+                        pods, err := clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{
+                                        LabelSelector: fmt.Sprintf("job-name=%s", createdJob.Name),
+                                     })
+                        if err != nil {
+                                fmt.Printf("Error listing pods: %v\n", err)
+                                time.Sleep(2 * time.Second)
+                                continue
+                        }
+
+                        if len(pods.Items) > 0 && pods.Items[0].Status.Phase != corev1.PodPending {
+                                podName = pods.Items[0].Name
+                                break
+                        }
+
+                        time.Sleep(2 * time.Second)
+                }
+                logOpts := &corev1.PodLogOptions{
+                                Follow: true,
+                           }
+
+                req := clientset.CoreV1().Pods(namespace).GetLogs(podName, logOpts)
+                stream, err := req.Stream(ctx)
+                if err != nil {
+                        fmt.Printf("Error streaming logs: %v\n", err)
+                        return
+                }
+                defer stream.Close()
+
+                fmt.Printf("--- Output from pod %s ---\n", podName)
+                buf := make([]byte, 2000)
+                for {
+                        n, err := stream.Read(buf)
+                        if n > 0 {
+                                os.Stdout.Write(buf[:n])
+                        }
+                        if err != nil {
+                                break
+                        }
+                }
         } else {
                 utils.PrintAsJSON(job)
         }
