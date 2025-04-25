@@ -222,8 +222,8 @@ func prepareEnvVars(config map[string]string) []corev1.EnvVar {
 		{Name: "NXF_EXECUTOR", Value: "k8s"},
 		{Name: "NXF_ANSI_LOG", Value: "false"},
                 {Name: "NXF_ENABLE_FS_SYNC", Value: "true"},
-                {Name: "NXF_WORK", Value: config["workDir"]},
-                {Name: "NXF_ASSETS", Value: config["projectDir"]},
+                {Name: "NXF_WORK", Value: utils.Stripped(config["workDir"])},
+                {Name: "NXF_ASSETS", Value: utils.Stripped(config["projectDir"])},
 	}
 	for _, e := range env {
 		if strings.HasPrefix(e, "NXF_") {
