@@ -53,7 +53,9 @@ func Execute(dryRun bool) {
 	launchDir, _ := os.Getwd()
 	if dir, ok := k8sConfig["launchDir"]; ok {
 		launchDir = strings.Trim(dir, "'\"")
-	}
+	} else {
+                k8sConfig["launchDir"] = launchDir
+        }
 
 	initScript := fmt.Sprintf("mkdir -p '%s'; cd '%s'; cp /etc/nextflow/nextflow.config .", launchDir, launchDir)
 	secret := &corev1.Secret{
@@ -82,7 +84,7 @@ func Execute(dryRun bool) {
 	command := []string{"/bin/bash", "-c", mainCmd}
 
 	resources := prepareResources(args.HeadCPUs, args.HeadMemory)
-	envVars := prepareEnvVars()
+	envVars := prepareEnvVars(k8sConfig)
 
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -93,6 +95,7 @@ func Execute(dryRun bool) {
 			},
 		},
 		Spec: batchv1.JobSpec{
+                        BackoffLimit: utils.Int32Ptr(0),
                         TTLSecondsAfterFinished: &args.Ttl,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"job-name": args.JobName}},
@@ -213,11 +216,14 @@ func prepareResources(cpus, memory string) corev1.ResourceRequirements {
 	}
 }
 
-func prepareEnvVars() []corev1.EnvVar {
+func prepareEnvVars(config map[string]string) []corev1.EnvVar {
 	env := os.Environ()
 	envVars := []corev1.EnvVar{
 		{Name: "NXF_EXECUTOR", Value: "k8s"},
 		{Name: "NXF_ANSI_LOG", Value: "false"},
+                {Name: "NXF_ENABLE_FS_SYNC", Value: "true"},
+                {Name: "NXF_WORK", Value: config["workDir"]},
+                {Name: "NXF_ASSETS", Value: config["projectDir"]},
 	}
 	for _, e := range env {
 		if strings.HasPrefix(e, "NXF_") {
