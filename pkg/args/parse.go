@@ -2,8 +2,9 @@ package args
 
 import (
 	"os"
-	"strings"
         "nextflow-go/pkg/utils"
+        "path/filepath"
+	"strings"
 )
 
 type Args struct {
@@ -14,6 +15,7 @@ type Args struct {
 	HeadCPUs    string
 	HeadMemory  string
         ConfigName  string
+        ParamsFile  string
         Ttl         int32
 }
 
@@ -38,6 +40,7 @@ func ParseArgs() Args {
 
 	nextflowArgs := []string{}
 	volumesArgs := []string{}
+        paramsFile := ""
         configName := "nextflow.config"
         headCPUs := "1"
         headMemory := "8Gi"
@@ -71,6 +74,11 @@ func ParseArgs() Args {
                         case "-c":
                                 configName = args[i+1]
                                 skipNext = true
+                        case "-params-file":
+                                paramsFile = args[i+1]
+                                skipNext = true
+                                filename := filepath.Base(paramsFile)
+                                nextflowArgs = append(nextflowArgs, "-params-file", "/etc/nextflow/"+filename)
 			default:
 				nextflowArgs = append(nextflowArgs, arg)
 			}
@@ -87,6 +95,7 @@ func ParseArgs() Args {
 		HeadCPUs:   headCPUs,
 		HeadMemory: headMemory,
                 ConfigName: configName,
+                ParamsFile: paramsFile,
                 Ttl:        ttl,
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+        "path/filepath"
 	"strconv"
 	"strings"
         "time"
@@ -58,13 +59,26 @@ func Execute(dryRun bool) {
         }
 
 	initScript := fmt.Sprintf("mkdir -p '%s'; cd '%s'; cp /etc/nextflow/nextflow.config .", launchDir, launchDir)
+
+        data := map[string][]byte{
+	        "init.sh":         []byte(initScript),
+	        "nextflow.config": []byte(finalConfig),
+        }
+
+        if args.ParamsFile != "" {
+	        content, err := os.ReadFile(args.ParamsFile)
+	        if err != nil {
+                        panic(err)
+	        }
+
+	        filename := filepath.Base(args.ParamsFile)
+	        data[filename] = content
+        }
+
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{GenerateName: "nf-config-"},
 		Type:       corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			"init.sh":         []byte(initScript),
-			"nextflow.config": []byte(finalConfig),
-		},
+		Data:       data, 
 	}
 
         secretName := "nf-config-"
