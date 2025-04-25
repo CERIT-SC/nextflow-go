@@ -75,10 +75,10 @@ func NormalizeVolumes(args []string, k8sConfig map[string]string) []string {
 		}
 	}
 
-        if stripped(k8sConfig["storageClaimName"]) != "" && stripped(k8sConfig["storageMountPath"]) != "" {
+        if Stripped(k8sConfig["storageClaimName"]) != "" && Stripped(k8sConfig["storageMountPath"]) != "" {
  	        volumes = append(volumes, fmt.Sprintf("%s:%s",
-		        stripped(k8sConfig["storageClaimName"]),
-		        stripped(k8sConfig["storageMountPath"])))
+		        Stripped(k8sConfig["storageClaimName"]),
+		        Stripped(k8sConfig["storageMountPath"])))
         }
 
 	pattern := `(?i)\[\s*volumeClaim\s*:\s*['\"]([^'\"]+)['\"]\s*,\s*mountPath\s*:\s*['\"]([^'\"]+)['\"]\s*\]`
@@ -137,6 +137,6 @@ func AttachVolumesToJob(job *batchv1.Job, volumes []string, secretName string) {
 	)
 }
 
-func stripped(s string) string {
+func Stripped(s string) string {
 	return strings.Trim(s, "'\"")
 }

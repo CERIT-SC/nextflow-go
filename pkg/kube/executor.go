@@ -24,6 +24,10 @@ import (
 func Execute(dryRun bool) {
 	args := args.ParseArgs()
 	k8sConfig, restConfigStr, _ := config.ReadNextflowConfig(args.ConfigName)
+        k8sConfig, err := config.NormalizeK8sConfig(k8sConfig)
+        if err != nil {
+                panic(err)
+        }
 
 	volumes := utils.NormalizeVolumes(args.Volumes, k8sConfig)
 	finalConfig := utils.PrepareFinalConfig(k8sConfig, restConfigStr)

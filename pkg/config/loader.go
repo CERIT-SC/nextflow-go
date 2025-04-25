@@ -6,7 +6,41 @@ import (
 	"os"
 	"regexp"
 	"strings"
+        "nextflow-go/pkg/utils"
 )
+
+var refPattern = regexp.MustCompile(`\$\{k8s\.([a-zA-Z0-9_]+)\}`)
+
+func NormalizeK8sConfig(config map[string]string) (map[string]string, error) {
+        normalized := make(map[string]string)
+
+	for key, value := range config {
+		matches := refPattern.FindAllStringSubmatch(value, -1)
+		newValue := value
+
+		for _, match := range matches {
+			refKey := match[1]
+
+			// Check for self-reference
+			if refKey == key {
+				return nil, fmt.Errorf("self-reference detected in key: %s", key)
+			}
+
+			refValue, ok := config[refKey]
+			if !ok {
+				return nil, fmt.Errorf("reference to undefined key: %s", refKey)
+			}
+                        refValue = utils.Stripped(refValue)
+
+			// Replace all occurrences of the reference
+			newValue = strings.ReplaceAll(newValue, match[0], refValue)
+		}
+
+		normalized[key] = newValue
+	}
+
+	return normalized, nil
+}
 
 func ReadNextflowConfig(filename string) (map[string]string, string, error) {
 	file, err := os.Open(filename)
