@@ -71,7 +71,7 @@ func ParseArgs() Args {
 				skipNext = true
 			case "-name", "-head-prescript":
 				skipNext = true
-                        case "-c":
+                        case "-C":
                                 configName = args[i+1]
                                 skipNext = true
                         case "-params-file":
