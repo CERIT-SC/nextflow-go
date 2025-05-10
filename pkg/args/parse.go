@@ -16,6 +16,7 @@ type Args struct {
 	HeadMemory  string
         ConfigName  string
         ParamsFile  string
+        CustomFile  string
         Ttl         int32
 }
 
@@ -41,6 +42,7 @@ func ParseArgs() Args {
 	nextflowArgs := []string{}
 	volumesArgs := []string{}
         paramsFile := ""
+        customFile := ""
         configName := "nextflow.config"
         headCPUs := "1"
         headMemory := "8Gi"
@@ -74,6 +76,11 @@ func ParseArgs() Args {
                         case "-C":
                                 configName = args[i+1]
                                 skipNext = true
+                        case "-c", "-config":
+                                customFile = args[i+1]
+                                skipNext = true
+                                filename := filepath.Base(customFile)
+                                nextflowArgs = append(nextflowArgs, "-c", "/etc/nextflow/"+filename)
                         case "-params-file":
                                 paramsFile = args[i+1]
                                 skipNext = true
@@ -96,6 +103,7 @@ func ParseArgs() Args {
 		HeadMemory: headMemory,
                 ConfigName: configName,
                 ParamsFile: paramsFile,
+                CustomFile: customFile,
                 Ttl:        ttl,
 	}
 }

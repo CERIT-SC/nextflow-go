@@ -75,6 +75,16 @@ func Execute(dryRun bool) {
 	        data[filename] = content
         }
 
+        if args.CustomFile != "" {
+                content, err := os.ReadFile(args.CustomFile)
+                if err != nil {
+                        panic(err)
+                }
+
+                filename := filepath.Base(args.CustomFile)
+                data[filename] = content
+        }
+
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{GenerateName: "nf-config-"},
 		Type:       corev1.SecretTypeOpaque,
