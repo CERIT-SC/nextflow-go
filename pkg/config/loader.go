@@ -61,6 +61,9 @@ func ReadNextflowConfig(filename string) (map[string]string, string, error) {
 
 	for scanner.Scan() {
 		line := accumulator + scanner.Text()
+                if idx := strings.Index(line, "//"); idx != -1 {
+                        line = line[:idx]
+                }
 		if !insideK8s {
 			if k8sStartRegex.MatchString(line) {
 				insideK8s = true
@@ -72,7 +75,7 @@ func ReadNextflowConfig(filename string) (map[string]string, string, error) {
 				accumulator += line
 			}
 			continue
-		}
+		} 
 		nestingLevel += strings.Count(line, "{") - strings.Count(line, "}")
 		k8sBlock = append(k8sBlock, line)
 		if nestingLevel == 0 {
