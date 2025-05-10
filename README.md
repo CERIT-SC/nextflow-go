@@ -55,3 +55,26 @@ The following options are currently supported (mirroring the original `kuberun` 
 
 If the `nextflow.config` does not define the `computeResourceType`, the launcher defaults to using the `Job` compute type.
 
+## Current Limitations
+
+The tool does not parse C/C++ style block comments (`/* ... */`) around the `k8s` section. It does support line comments using `//`.
+
+For example, in the configuration below, the first `k8s` block will still be used, even though it is inside a block comment. This behavior may lead to unexpected results:
+
+```config
+/*
+k8s {
+   namespace           = 'my-namespace'
+   runAsUser           = 1000
+   computeResourceType = 'Job'
+   pullPolicy          = 'IfNotPresent'
+   launchDir           = '/tmp/x'
+}*/
+k8s {
+   namespace           = 'other-namespace'
+   runAsUser           = 1000
+   computeResourceType = 'Job'
+   pullPolicy          = 'IfNotPresent'
+   launchDir           = '/tmp/x'
+}
+```

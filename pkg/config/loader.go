@@ -61,8 +61,20 @@ func ReadNextflowConfig(filename string) (map[string]string, string, error) {
 
 	for scanner.Scan() {
 		line := accumulator + scanner.Text()
-                if idx := strings.Index(line, "//"); idx != -1 {
-                        line = line[:idx]
+                inString := false
+                var quote rune
+                for i := 0; i < len(line); i++ {
+                        if !inString && strings.HasPrefix(line[i:], "//") {
+                                line = line[:i]
+                                break
+                        }
+                        if (line[i] == '\'' || line[i] == '"') && (i == 0 || line[i-1] != '\\') {
+                                if !inString {
+                                        inString, quote = true, rune(line[i])
+                                } else if rune(line[i]) == quote {
+                                        inString = false
+                                }
+                        }
                 }
 		if !insideK8s {
 			if k8sStartRegex.MatchString(line) {
