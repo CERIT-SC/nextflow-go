@@ -24,8 +24,11 @@ import (
 
 func Execute(dryRun bool) {
 	args := args.ParseArgs()
-	k8sConfig, restConfigStr, _ := config.ReadNextflowConfig(args.ConfigName)
-        k8sConfig, err := config.NormalizeK8sConfig(k8sConfig)
+	k8sConfig, restConfigStr, err := config.ReadNextflowConfig(args.ConfigName)
+        if err != nil {
+                panic(err)
+        }
+        k8sConfig, err = config.NormalizeK8sConfig(k8sConfig)
         if err != nil {
                 panic(err)
         }

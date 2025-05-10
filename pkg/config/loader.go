@@ -98,7 +98,7 @@ func ReadNextflowConfig(filename string) (map[string]string, string, error) {
 		remainingLines = append(remainingLines, scanner.Text())
 	}
 	if !insideK8s {
-		return nil, "", fmt.Errorf("k8s block not found")
+		return nil, "", fmt.Errorf("k8s block not found in config file %s", filename)
 	}
 	return parseK8sBlock(k8sBlock), strings.Join(remainingLines, "\n"), nil
 }
