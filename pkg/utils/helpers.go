@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-        "os"
 	"regexp"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -87,7 +86,17 @@ func NormalizeVolumes(args []string, k8sConfig map[string]string) []string {
 	matches := re.FindAllStringSubmatch(k8sConfig["pod"], -1)
 	for _, match := range matches {
 		if len(match) == 3 {
-			volumes = append(volumes, fmt.Sprintf("%s:%s", match[1], match[2]))
+                        newVolume := fmt.Sprintf("%s:%s", match[1], match[2])
+                        var exists bool
+                        for _, v := range volumes {
+                                if v == newVolume {
+                                        exists = true
+                                        break
+                                }
+                        }
+                        if !exists {
+                                volumes = append(volumes, newVolume)
+                        }
 		}
 	}
 
@@ -104,14 +113,20 @@ func PrepareFinalConfig(k8sConfig map[string]string, nextflowConfig string) stri
 }
 
 func AttachVolumesToJob(job *batchv1.Job, volumes []string, secretName string) {
+        mountPathMap := make(map[string]bool)
 	for i, v := range volumes {
 		parts := strings.Split(v, ":")
 		if len(parts) != 2 {
-			fmt.Fprintf(os.Stderr, "Invalid volume format: %s\n", v)
-			continue
+			err := fmt.Sprintf("Invalid volume format: %s\n", v)
+                        panic(err)
 		}
 		volName := fmt.Sprintf("vol-%d", i)
 		mount := parts[1]
+                if _, exists := mountPathMap[mount]; exists {
+                        err := fmt.Sprintf("Duplicate mount path detected: %s\n", mount)
+                        panic(err)
+                }
+                mountPathMap[mount] = true
 		job.Spec.Template.Spec.Volumes = append(job.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: volName,
                         VolumeSource: corev1.VolumeSource{
