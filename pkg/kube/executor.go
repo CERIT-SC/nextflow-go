@@ -71,6 +71,16 @@ func Execute(dryRun bool) {
                 serviceAccount = k8sConfig["serviceAccount"]
         }
 
+        pullPolicy := corev1.PullAlways
+        if k8sConfig["pullPolicy"] == "IfNotPresent" {
+                pullPolicy = corev1.PullIfNotPresent
+        }
+       
+        runAsUser := 1000
+        if k8sConfig["runAsUser"] != "" {
+                runAsUser, _ = strconv.Atoi(k8sConfig["runAsUser"])
+        }
+
 	initScript := fmt.Sprintf("mkdir -p '%s'; cd '%s'; cp /etc/nextflow/nextflow.config .", launchDir, launchDir)
 
         data := map[string][]byte{
@@ -147,11 +157,11 @@ func Execute(dryRun bool) {
 					Containers: []corev1.Container{{
 						Name:            args.JobName,
 						Image:           args.HeadImage,
-                                                ImagePullPolicy: corev1.PullAlways,
+                                                ImagePullPolicy: pullPolicy,
 						Command:         command,
 						Resources:       resources,
 						Env:             envVars,
-						SecurityContext: &corev1.SecurityContext{RunAsUser: utils.Int64Ptr(1000), AllowPrivilegeEscalation: utils.BoolPtr(false), Capabilities: &corev1.Capabilities{Drop: []corev1.Capability{"ALL"}}},
+						SecurityContext: &corev1.SecurityContext{RunAsUser: utils.Int64Ptr(int64(runAsUser)), AllowPrivilegeEscalation: utils.BoolPtr(false), Capabilities: &corev1.Capabilities{Drop: []corev1.Capability{"ALL"}}},
 					}}},
 			},
 		},
