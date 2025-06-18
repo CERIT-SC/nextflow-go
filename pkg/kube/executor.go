@@ -66,6 +66,11 @@ func Execute(dryRun bool) {
         }
 	finalConfig := utils.PrepareFinalConfig(k8sConfig, restConfigStr)
 
+        serviceAccount := "default"
+        if k8sConfig["serviceAccount"] != "" {
+                serviceAccount = k8sConfig["serviceAccount"]
+        }
+
 	initScript := fmt.Sprintf("mkdir -p '%s'; cd '%s'; cp /etc/nextflow/nextflow.config .", launchDir, launchDir)
 
         data := map[string][]byte{
@@ -132,6 +137,7 @@ func Execute(dryRun bool) {
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"job-name": args.JobName}},
 				Spec: corev1.PodSpec{
+                                        ServiceAccountName: serviceAccount,
 					RestartPolicy: corev1.RestartPolicyNever,
 					SecurityContext: &corev1.PodSecurityContext{
 						FSGroupChangePolicy: func() *corev1.PodFSGroupChangePolicy { p := corev1.PodFSGroupChangePolicy("OnRootMismatch"); return &p }(),
