@@ -46,7 +46,7 @@ func ParseArgs() Args {
         configName := "nextflow.config"
         headCPUs := "1"
         headMemory := "8Gi"
-        headImage := "cerit.io/nextflow/nextflow:24.10.5"
+        headImage := "cerit.io/nextflow/nextflow:25.04.4"
 	skipNext := false
 	for i, arg := range args {
 		if skipNext {

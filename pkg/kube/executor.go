@@ -34,7 +34,6 @@ func Execute(dryRun bool) {
         }
 
 	volumes := utils.NormalizeVolumes(args.Volumes, k8sConfig)
-	finalConfig := utils.PrepareFinalConfig(k8sConfig, restConfigStr)
 	config, err := getKubeConfig()
 	if err != nil {
 		panic(err)
@@ -60,6 +59,12 @@ func Execute(dryRun bool) {
 	} else {
                 k8sConfig["launchDir"] = launchDir
         }
+
+        if k8sConfig["computeResourceType"] == "" {
+                fmt.Printf("computeResourceType not defined in configuration, defaulting to Job\n")
+                k8sConfig["computeResourceType"] = "'Job'"
+        }
+	finalConfig := utils.PrepareFinalConfig(k8sConfig, restConfigStr)
 
 	initScript := fmt.Sprintf("mkdir -p '%s'; cd '%s'; cp /etc/nextflow/nextflow.config .", launchDir, launchDir)
 
@@ -136,6 +141,7 @@ func Execute(dryRun bool) {
 					Containers: []corev1.Container{{
 						Name:            args.JobName,
 						Image:           args.HeadImage,
+                                                ImagePullPolicy: corev1.PullAlways,
 						Command:         command,
 						Resources:       resources,
 						Env:             envVars,

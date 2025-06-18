@@ -38,7 +38,7 @@ func NormalizeK8sConfig(config map[string]string) (map[string]string, error) {
 
 		normalized[key] = newValue
 	}
-
+        
 	return normalized, nil
 }
 
