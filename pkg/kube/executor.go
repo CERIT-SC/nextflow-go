@@ -68,11 +68,11 @@ func Execute(dryRun bool) {
 
         serviceAccount := "default"
         if k8sConfig["serviceAccount"] != "" {
-                serviceAccount = k8sConfig["serviceAccount"]
+                serviceAccount = utils.Stripped(k8sConfig["serviceAccount"])
         }
 
         pullPolicy := corev1.PullAlways
-        if k8sConfig["pullPolicy"] == "IfNotPresent" {
+        if k8sConfig["pullPolicy"] != "" && utils.Stripped(k8sConfig["pullPolicy"]) == "IfNotPresent" {
                 pullPolicy = corev1.PullIfNotPresent
         }
        
