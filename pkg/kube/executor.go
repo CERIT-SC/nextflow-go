@@ -64,6 +64,12 @@ func Execute(dryRun bool) {
                 fmt.Printf("computeResourceType not defined in configuration, defaulting to Job\n")
                 k8sConfig["computeResourceType"] = "'Job'"
         }
+
+        if k8sConfig["cpuLimits"] == "" {
+                fmt.Printf("cpuLimits is not defined, defaulting to true\n")
+                k8sConfig["cpuLimits"] = "true"
+        }
+
 	finalConfig := utils.PrepareFinalConfig(k8sConfig, restConfigStr)
 
         serviceAccount := "default"
