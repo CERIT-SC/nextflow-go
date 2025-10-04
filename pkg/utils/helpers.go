@@ -3,11 +3,11 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
+        "math/rand"
 	"regexp"
-
-	"github.com/brianvoe/gofakeit/v7"
-
+	"strings"
+        "time"
+        
         batchv1 "k8s.io/api/batch/v1"
         corev1 "k8s.io/api/core/v1"
 )
@@ -16,8 +16,71 @@ func BoolPtr(b bool) *bool    { return &b }
 func Int64Ptr(i int64) *int64 { return &i }
 func Int32Ptr(i int32) *int32 { return &i }
 
+var wordPairs = []string{
+    "basta-fidli",
+    "cik-cak",
+    "cimpr-campr",
+    "cinky-linky",
+    "coro-moro",
+    "cuchty-cvachty",
+    "cury-mury",
+    "dumky-zalky",
+    "elce-pelce",
+    "emo-nono",
+    "enyky-benyky",
+    "fifty-fifty",
+    "fuj-tajbl",
+    "hajen-dadej",
+    "hala-bala",
+    "haya-paya",
+    "himl-herdek",
+    "hogo-fogo",
+    "klarity-klap",
+    "klido-pibo",
+    "krinda-pana",
+    "krindy-pindy",
+    "kruci-pisek",
+    "kurnik-sopa",
+    "kyho-slaka",
+    "kyho-vyra",
+    "lary-fary",
+    "lazo-plazo",
+    "matla-patla",
+    "morces-hadry",
+    "myrnyx-tyrnyx",
+    "nota-bene",
+    "odsad-pocad",
+    "roco-fuco",
+    "ruty-suty",
+    "safra-porte",
+    "sakum-prdum",
+    "saky-paky",
+    "salto-mortale",
+    "sec-mazec",
+    "sodoma-gomora",
+    "starou-belu",
+    "suma-sumarum",
+    "spibl-nygl",
+    "srummy-srumaida",
+    "tando-pede",
+    "suby-duby",
+    "supito-presto",
+    "tagu-figu",
+    "techtle-mechtle",
+    "tingl-tangl",
+    "tip-top",
+    "tfun-tajxl",
+    "trnky-brnky",
+    "tresky-plesky",
+    "tudle-nudle",
+    "tufu-nunu",
+    "tuty-fruty",
+}
+
 func GenerateRandomName() string {
-	return strings.ToLower(strings.ReplaceAll(fmt.Sprintf("%s-%s", gofakeit.Adjective(), gofakeit.Noun()), " ", "-"))
+        rand.Seed(time.Now().UnixNano())
+        randomIndex := rand.Intn(len(wordPairs))
+        return wordPairs[randomIndex]
 }
 
 func PrintAsJSON(obj interface{}) {
