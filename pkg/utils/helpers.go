@@ -75,12 +75,47 @@ var wordPairs = []string{
     "tudle-nudle",
     "tufu-nunu",
     "tuty-fruty",
+    "bam-bam",
+    "bim-bam",
+    "bum-cink",
+    "caky-laky",
+    "cary-mary",
+    "ciry-miry",
+    "dingo-bingo",
+    "drapy-hrapy",
+    "fiky-miky",
+    "frk-brk",
+    "gulo-bulo",
+    "haldy-baldy",
+    "hity-pity",
+    "hup-cup",
+    "jupi-lupi",
+    "kity-mity",
+    "kupy-lupy",
+    "lity-bity",
+    "lup-dup",
+    "miky-liky",
+    "nany-fany",
+    "pity-mity",
+    "puf-huf",
+    "ram-pam",
+    "rara-bara",
+    "sity-mity",
+    "srum-cum",
+    "tiki-miki",
+    "trala-lala",
+    "zigi-zagi",
 }
 
 func GenerateRandomName() string {
         rand.Seed(time.Now().UnixNano())
         randomIndex := rand.Intn(len(wordPairs))
-        return wordPairs[randomIndex]
+        const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+        b := make([]byte, 6)
+        for i := range b {
+                b[i] = charset[rand.Intn(len(charset))]
+        }
+        return wordPairs[randomIndex] + "-" + string(b)
 }
 
 func PrintAsJSON(obj interface{}) {

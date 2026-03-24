@@ -137,7 +137,7 @@ func Execute(dryRun bool) {
 	command := []string{"/bin/bash", "-c", mainCmd}
 
 	resources := prepareResources(args.HeadCPUs, args.HeadMemory)
-	envVars := prepareEnvVars(k8sConfig)
+	envVars := prepareEnvVars(k8sConfig, args.HeadEnv)
 
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -271,7 +271,7 @@ func prepareResources(cpus, memory string) corev1.ResourceRequirements {
 	}
 }
 
-func prepareEnvVars(config map[string]string) []corev1.EnvVar {
+func prepareEnvVars(config map[string]string, headEnv string) []corev1.EnvVar {
 	env := os.Environ()
 	envVars := []corev1.EnvVar{
 		{Name: "NXF_EXECUTOR", Value: "k8s"},
@@ -283,6 +283,15 @@ func prepareEnvVars(config map[string]string) []corev1.EnvVar {
 	for _, e := range env {
 		if strings.HasPrefix(e, "NXF_") {
 			parts := strings.SplitN(e, "=", 2)
+			if len(parts) == 2 {
+				envVars = append(envVars, corev1.EnvVar{Name: parts[0], Value: parts[1]})
+			}
+		}
+	}
+	if headEnv != "" {
+		pairs := strings.Split(headEnv, ",")
+		for _, pair := range pairs {
+			parts := strings.SplitN(pair, "=", 2)
 			if len(parts) == 2 {
 				envVars = append(envVars, corev1.EnvVar{Name: parts[0], Value: parts[1]})
 			}

@@ -14,6 +14,7 @@ type Args struct {
 	HeadImage   string
 	HeadCPUs    string
 	HeadMemory  string
+        HeadEnv     string
         ConfigName  string
         ParamsFile  string
         CustomFile  string
@@ -46,7 +47,8 @@ func ParseArgs() Args {
         configName := "nextflow.config"
         headCPUs := "1"
         headMemory := "8Gi"
-        headImage := "cerit.io/nextflow/nextflow:25.04.7"
+        headImage := "cerit.io/nextflow/nextflow:25.10.2"
+        headEnv := ""
 	skipNext := false
 	for i, arg := range args {
 		if skipNext {
@@ -71,6 +73,9 @@ func ParseArgs() Args {
 			case "-head-memory":
 				headMemory = args[i+1]
 				skipNext = true
+                        case "-head-env":
+                                headEnv = args[i+1]
+                                skipNext = true
 			case "-name", "-head-prescript":
 				skipNext = true
                         case "-C":
@@ -101,6 +106,7 @@ func ParseArgs() Args {
 		HeadImage:  headImage,
 		HeadCPUs:   headCPUs,
 		HeadMemory: headMemory,
+                HeadEnv:    headEnv,
                 ConfigName: configName,
                 ParamsFile: paramsFile,
                 CustomFile: customFile,
